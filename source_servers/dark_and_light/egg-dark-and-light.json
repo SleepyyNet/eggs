@@ -1,0 +1,90 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v1"
+    },
+    "exported_at": "2018-11-01T18:08:58-05:00",
+    "name": "Dark and Light",
+    "author": "hello@venatus.digital",
+    "description": "A simple Docker container with Wine to run DNL using Pterodactyl Panel",
+    "image": "quay.io\/parkervcp\/pterodactyl-images:wine-source",
+    "startup": "wine64 .\/DNL\/Binaries\/Win64\/DNLServer.exe \/Game\/DNL\/Maps\/CapeOfSacredPath\/DNL_ALL?Port={{PORT}}?QueryPort={{QPORT}}?SessionName={{SERVER_NAME}}?MaxPlayers={{MAX_PLAYERS}}?AllowFlyerCarryPvE=true -servergamelog -useallavailablecores -nosteamclient -game -server -log",
+    "config": {
+        "files": "{}",
+        "startup": "{\r\n    \"done\": \"Full Startup:\",\r\n    \"userInteraction\": []\r\n}",
+        "logs": "{\r\n    \"custom\": false,\r\n    \"location\": \"Logs\/\"\r\n}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n# PixARK: Installation Script\r\n#\r\n# Server Files: \/mnt\/server\r\napt -y update\r\napt -y --no-install-recommends install curl lib32gcc1 ca-certificates\r\ncd \/tmp\r\ncurl -sSL -o steamcmd.tar.gz http:\/\/media.steampowered.com\/installer\/steamcmd_linux.tar.gz\r\ncurl -sSL -o dnl-missing.tar.gz https:\/\/panel.dcorv.us\/egg-files\/dnl-missing.tar.gz\r\nmkdir -p \/mnt\/server\/steamcmd\r\nmkdir -p \/mnt\/server\/DNL\r\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root \/mnt\r\nexport HOME=\/mnt\/server\r\n\/mnt\/server\/steamcmd\/steamcmd.sh +@sSteamCmdForcePlatformType windows +login YOURUSER YOURPASS +force_install_dir \/home\/container\/DNL +app_update {{SRCDS_APPID}} validate +quit\r\ntar -xzvf dnl-missing.tar.gz -C \/mnt\/server\/DNL\/Binaries\/Win64",
+            "container": "ubuntu:latest",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Server Password",
+            "description": "If specified, players must provide this password to join the server.",
+            "env_variable": "ARK_PASSWORD",
+            "default_value": "",
+            "user_viewable": 1,
+            "user_editable": 1,
+            "rules": "nullable|alpha_dash|between:1,100"
+        },
+        {
+            "name": "Admin Password",
+            "description": "If specified, players must provide this password (via the in-game console) to gain access to administrator commands on the server.",
+            "env_variable": "ARK_ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": 1,
+            "user_editable": 1,
+            "rules": "nullable|alpha_dash|between:1,100"
+        },
+        {
+            "name": "Maximum Players",
+            "description": "Specifies the maximum number of players that can play on the server simultaneously.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "10",
+            "user_viewable": 1,
+            "user_editable": 0,
+            "rules": "required|numeric|digits_between:1,4"
+        },
+        {
+            "name": "Query Port",
+            "description": "The port assigned for use as query port",
+            "env_variable": "QPORT",
+            "default_value": "",
+            "user_viewable": 1,
+            "user_editable": 1,
+            "rules": "required|numeric|digits_between:1,5"
+        },
+        {
+            "name": "Port",
+            "description": "The port assigned for use asport",
+            "env_variable": "PORT",
+            "default_value": "",
+            "user_viewable": 1,
+            "user_editable": 0,
+            "rules": "required|numeric|digits_between:1,5"
+        },
+        {
+            "name": "App ID",
+            "description": "DNL Source App ID",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "630230",
+            "user_viewable": 0,
+            "user_editable": 0,
+            "rules": "required|numeric"
+        },
+        {
+            "name": "Server Name",
+            "description": "This is your Server's Name.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Dark and Light Server",
+            "user_viewable": 1,
+            "user_editable": 1,
+            "rules": "required|string|max:50"
+        }
+    ]
+}
